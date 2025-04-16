@@ -21,8 +21,8 @@ inline constexpr uint led = 25;
 inline constexpr uint i2cSda = 0;
 inline constexpr uint i2cScl = 1;
 
-inline constexpr etl::array<uint, 3> gripperMotorPwmL{};
-inline constexpr etl::array<uint, 3> gripperMotorPwmR{};
+inline constexpr etl::array<uint, 3> gripperMotorPwmL{14, 10, 12};
+inline constexpr etl::array<uint, 3> gripperMotorPwmR{15, 11, 13};
 
 inline constexpr etl::array<uint, 3> armStepperPul{ 2, 6, 8 };
 inline constexpr etl::array<uint, 3> armStepperDir{ 3, 7, 9 };

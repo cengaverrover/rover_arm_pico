@@ -16,13 +16,45 @@
 
 #include <hardware/watchdog.h>
 
+class L298N {
+
+public:
+    L298N(uint in1, uint in2) : in1_(in1), in2_(in2) {
+        gpio_init(in1_);
+        gpio_set_dir(in1_, GPIO_OUT);
+        gpio_put(in1_, 0);
+
+        gpio_init(in2_);
+        gpio_set_dir(in2_, GPIO_OUT);
+        gpio_put(in2_, 0);
+    }
+
+    void setSpeed(float speed) {
+        if (speed > 0) {
+            gpio_put(in1_, 1);
+            gpio_put(in2_, 0);
+        } else if (speed < 0) {
+            gpio_put(in1_, 0);
+            gpio_put(in2_, 1);
+        } else {
+            gpio_put(in1_, 0);
+            gpio_put(in2_, 0);
+        }
+    }
+
+private:
+    uint in1_ {};
+    uint in2_ {};
+
+};
+
 namespace freertos {
 
 namespace task {
 
 template <uint i> void gripperMotorTask(void* arg) {
     // Create the motor and encoder classes.
-    motor::BTS7960 motor(pinout::gripperMotorPwmL[i], pinout::gripperMotorPwmR[i]);
+    L298N motor(pinout::gripperMotorPwmL[i], pinout::gripperMotorPwmR[i]);
 
     // Create the ros messeages.
     rover_drive_interfaces__msg__MotorDrive gripperMsgReceived{};
