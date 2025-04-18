@@ -10,7 +10,7 @@
 #include <rover_arm_interfaces/msg/arm_stepper.h>
 #include <rover_arm_interfaces/msg/stepper_feedback.h>
 
-#include "BTS7960.hpp"
+#include "motor.hpp"
 #include "stepper.hpp"
 #include "pinout.hpp"
 
@@ -48,13 +48,14 @@ private:
 
 };
 
+
 namespace freertos {
 
 namespace task {
 
 template <uint i> void gripperMotorTask(void* arg) {
     // Create the motor and encoder classes.
-    L298N motor(pinout::gripperMotorPwmL[i], pinout::gripperMotorPwmR[i]);
+    Motor motor(pinout::gripperMotorPwmL[i], pinout::gripperMotorPwmR[i]);
 
     // Create the ros messeages.
     rover_drive_interfaces__msg__MotorDrive gripperMsgReceived{};
@@ -85,18 +86,17 @@ template <uint i> void gripperMotorTask(void* arg) {
             ros::parameter::gripperMotorMaxDutyCycle);
 
         // Set the dutycyle of the motors.
-        motor.setSpeed(feedbackMsgSent.dutycycle);
+        motor.setSpeedPercent(feedbackMsgSent.dutycycle);
         // Send the feedback messeage to the queue
         xQueueOverwrite(freertos::queue::gripperFeedbackQueues[i], &feedbackMsgSent);
     }
 }
 template <uint i> void stepperMotorTask(void* arg) {
 
-    uint32_t speedControlPeriodMs = ros::parameter::stepperSpeedControlPeriodMs[i];
     uint32_t stepsPerRev = ros::parameter::stepperStepsPerRev[i];
 
     Stepper stepper(
-        pinout::armStepperPul[i], pinout::armStepperDir[i], stepsPerRev, speedControlPeriodMs);
+        pinout::armStepperPul[i], pinout::armStepperDir[i], stepsPerRev);
 
     rover_arm_interfaces__msg__ArmStepper armStepperMsgReceived{};
     rover_arm_interfaces__msg__StepperFeedback stepperFeedbackSent{};
@@ -113,14 +113,20 @@ template <uint i> void stepperMotorTask(void* arg) {
             // stepper.startMotion(armStepperMsgReceived.target_pos_steps,
             //     ros::parameter::stepperMaxAccel[i], 1000, true);
             stepper.setTargetPos(armStepperMsgReceived.target_pos_steps);
-            if (armStepperMsgReceived.speed_steps_sec > 0) {
+            stepper.setSpeed(abs(armStepperMsgReceived.speed_steps_sec));
+
+            int32_t currentPos = stepper.getPos();
+
+            if (armStepperMsgReceived.target_pos_steps > currentPos) {
                 stepper.setDir(true);
                 stepper.enable(true);
-            } else if (armStepperMsgReceived.speed_steps_sec < 0) {
+            } else if (armStepperMsgReceived.speed_steps_sec < currentPos) {
                 stepper.setDir(false);
                 stepper.enable(true);
+            } else {
+                stepper.enable(false);
             }
-            stepper.setSpeedFp(labs(armStepperMsgReceived.speed_steps_sec) * 1000);
+            
         }
 
         stepperFeedbackSent.pos_steps = stepper.getPos();
@@ -193,7 +199,7 @@ void microRosTask(void* arg) {
     // server.
     // We need the second executor since we have more handles than the maximum
     // executor handle.
-    ros::parameter::Server paramServer(&node, true, 18, true, false);
+    ros::parameter::Server paramServer(&node, true, 13, true, false);
     rclc_executor_t paramServerExecutor = rclc_executor_get_zero_initialized_executor();
     ret += rclc_executor_init(
         &paramServerExecutor, &support.context, RCLC_EXECUTOR_PARAMETER_SERVER_HANDLES, &allocator);

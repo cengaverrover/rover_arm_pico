@@ -50,7 +50,7 @@ private:
     rcl_ret_t initParameters();
 };
 
-inline constexpr int paramCount = 19;
+inline constexpr int paramCount = 13;
 
 inline int32_t gripperMotorMaxRpm = 100;
 
@@ -63,17 +63,12 @@ inline float gripperMotorMaxCurrent = 50.0f;
 inline int32_t motorTimeoutMs = 1000;
 inline int32_t stepperTimeoutMs = 1000;
 
-inline int32_t feedbackPeriodMs = 100;
+inline int32_t feedbackPeriodMs = 50;
 
-inline int32_t executorSpinPeriodMs = 50;
+inline int32_t executorSpinPeriodMs = 20;
 
 inline etl::array<float, 3> stepperGearRatios{ 50.0f, 68.18181818f, 2.0f };
 inline etl::array<int32_t, 3> stepperStepsPerRev{ 400, 400, 2000 };
-inline etl::array<int32_t, 3> stepperSpeedControlPeriodMs{ 2, 2, 2 };
-
-inline etl::array<int32_t, 3> stepperMaxAccel{ stepperStepsPerRev[0] * stepperStepsPerRev[0] / 2,
-    stepperStepsPerRev[1] * stepperStepsPerRev[1] / 2,
-    stepperStepsPerRev[2] * stepperStepsPerRev[2] / 2 };
 
 
 } // namespace parameter

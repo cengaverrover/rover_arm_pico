@@ -30,14 +30,7 @@ constexpr static etl::array<etl::string_view, 3> stepperGearRatiosNames{ "steppe
 constexpr static etl::array<etl::string_view, 3> stepperStepsPerRevNames{ "stepper_steps_per_rev_0",
     "stepper_steps_per_rev_1", "stepper_steps_per_rev_2" };
 
-constexpr static etl::array<etl::string_view, 3> stepperSpeedControlPeriodMsNames{
-    "stepper_speed_control_period_ms_0", "stepper_speed_control_period_ms_1",
-    "stepper_speed_control_period_ms_2"
-};
-constexpr static etl::array<etl::string_view, 3> stepperMaxAccelNames{ "stepper_max_accel_0",
-    "stepper_max_accel_1", "stepper_max_accels_2" };
-
-static etl::unordered_map<etl::string_view, void*, 19> parameterMap{
+static etl::unordered_map<etl::string_view, void*, 13> parameterMap{
     {gripperMotorMaxRpmName,               &gripperMotorMaxRpm            },
     { gripperMotorMaxDutyCycleName,        &gripperMotorMaxDutyCycle      },
     { gripperMotorMaxCurrentName,          &gripperMotorMaxCurrent        },
@@ -51,12 +44,6 @@ static etl::unordered_map<etl::string_view, void*, 19> parameterMap{
     { stepperStepsPerRevNames[0],          &stepperStepsPerRev[0]         },
     { stepperStepsPerRevNames[1],          &stepperStepsPerRev[1]         },
     { stepperStepsPerRevNames[2],          &stepperStepsPerRev[2]         },
-    { stepperSpeedControlPeriodMsNames[0], &stepperSpeedControlPeriodMs[0]},
-    { stepperSpeedControlPeriodMsNames[1], &stepperSpeedControlPeriodMs[1]},
-    { stepperSpeedControlPeriodMsNames[2], &stepperSpeedControlPeriodMs[2]},
-    { stepperMaxAccelNames[0],             &stepperMaxAccel[0]            },
-    { stepperMaxAccelNames[1],             &stepperMaxAccel[1]            },
-    { stepperMaxAccelNames[2],             &stepperMaxAccel[2]            },
 };
 
 extern "C" bool onParameterChange(
@@ -150,8 +137,6 @@ rcl_ret_t Server::initParameters() {
     for (int i = 0; i < stepperGearRatios.size(); i++) {
         ret += addParameter(stepperGearRatiosNames[i], stepperGearRatios[i]);
         ret += addParameter(stepperStepsPerRevNames[i], stepperStepsPerRev[i]);
-        ret += addParameter(stepperSpeedControlPeriodMsNames[i], stepperSpeedControlPeriodMs[i]);
-        ret += addParameter(stepperMaxAccelNames[i], stepperMaxAccel[i]);
     }
     return ret;
 }
